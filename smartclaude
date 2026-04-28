@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Claude Code wrapper: appends a project-specific system prompt to every session.
+#
+# Appends TPP instructions to the system prompt via --append-system-prompt.
+# See https://photostructure.com/coding/claude-code-tpp/ for details.
+#
+# Usage:
+#   smartclaude            # Starts a TPP-aware session
+#   smartclaude --resume   # Resume with TPP context
+#   claude update          # Vanilla claude still works for non-TPP use
+#
+# The --append-system-prompt below is also a good place to add brief,
+# high-value instructions that Claude tends to ignore in CLAUDE.md.
+# Keep it concise! Every token here reduces your available context window.
+
+echo "Adding project system prompt..."
+
+DATE=$(date +%Y-%m-%d)
+
+command claude --append-system-prompt "$(
+  cat ~/.claude/CLAUDE.md  # Optional: include global instructions
+  echo "- The current date is $DATE"
+  cat <<'SYSTEM_PROMPT'
+
+This project uses Technical Project Plans (TPPs) in `docs/*.md` to share research, design decisions, and next steps between sessions.
+
+When you exit plan mode, your first step should be to write or update a relevant TPP using the /handoff skill.
+
+When you run low on context and you are working on a TPP, run the /handoff skill.
+
+SYSTEM_PROMPT
+)" "$@"
+
